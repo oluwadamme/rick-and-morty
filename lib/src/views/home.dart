@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:rickandmorty/src/models/responsive.dart';
 import 'package:rickandmorty/src/view_model/home_view_model.dart';
 import 'package:rickandmorty/src/views/character_card.dart';
 
@@ -46,24 +47,13 @@ class _HomeState extends State<Home> {
           return Stack(
             children: [
               provider.result.isNotEmpty
-                  ? GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount:
-                              orientation == Orientation.portrait ? 1 : 2,
-                          crossAxisSpacing: 15,
-                          childAspectRatio:
-                              orientation == Orientation.portrait ? 2.1 : 2,
-                          mainAxisSpacing: 15),
-                      shrinkWrap: true,
-                      itemCount: provider.result.length,
-                      itemBuilder: (context, int index) {
-                        return CharacterCard(
-                            img: provider.result[index].image,
-                            name: provider.result[index].name,
-                            species: provider.result[index].species,
-                            status: provider.result[index].status,
-                            gender: provider.result[index].gender);
-                      })
+                  ?  Responsive(
+          mobile: CharacterView(provider: provider, crossAxisCount: orientation == Orientation.portrait ? 1 : 2, orientation:orientation,childAspectRatio: orientation == Orientation.portrait ? 2.1 : 2,),
+          desktop: CharacterView(provider: provider, orientation:orientation),
+          tablet: CharacterView(provider: provider, crossAxisCount: orientation == Orientation.portrait ? 1 : 2, orientation:orientation,childAspectRatio: 1.1),
+          mobileLarge: CharacterView(provider: provider, crossAxisCount: orientation == Orientation.portrait ? 1 : 2, orientation:orientation,childAspectRatio: orientation == Orientation.portrait ? 2.1 : 2,),
+        )
+                  
                   : const Center(child: CircularProgressIndicator()),
               Align(
                 alignment: FractionalOffset.bottomCenter,
@@ -111,5 +101,39 @@ class _HomeState extends State<Home> {
             ],
           );
         }));
+  }
+}
+
+class CharacterView extends StatelessWidget {
+  const CharacterView({
+    Key? key,
+    required this.provider, required this.orientation,
+    this.crossAxisCount = 3,
+    this.childAspectRatio = 1.9,
+  }) : super(key: key);
+
+  final HomeViewModel provider;
+  final Orientation orientation;
+  final int crossAxisCount;
+  final double childAspectRatio;
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 15,
+            childAspectRatio: childAspectRatio,
+            mainAxisSpacing: 15),
+        shrinkWrap: true,
+        itemCount: provider.result.length,
+        itemBuilder: (context, int index) {
+          return CharacterCard(
+              img: provider.result[index].image,
+              name: provider.result[index].name,
+              species: provider.result[index].species,
+              status: provider.result[index].status,
+              gender: provider.result[index].gender);
+        });
   }
 }
